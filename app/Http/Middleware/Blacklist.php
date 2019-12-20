@@ -57,12 +57,6 @@ class Blacklist
 
     public static function flushList()
     {
-        $redis_host = env('REDIS_HOST', '127.0.0.1');
-        $redis_port = env('REDIS_PORT', 6379);
-        $process = Process::fromShellCommandline('redis-cli -h $redis_host -p $redis_port --scan --pattern blacklist:* | xargs redis-cli -h $redis_host -p $redis_port del');
-        $process->run();
-        if (!$process->isSuccessful()) {
-            throw new ProcessFailedException($process);
-        }
+        // no-op
     }
 }
