@@ -8,6 +8,7 @@ use Symfony\Component\Process\Process;
 
 class ClearQueuedJobs extends Command
 {
+
     /**
      * The name and signature of the console command.
      *
@@ -39,6 +40,8 @@ class ClearQueuedJobs extends Command
      */
     public function handle()
     {
+        $redis_host = env('REDIS_HOST', '127.0.0.1');
+        $redis_port = env('REDIS_PORT', 6379);
         // Stop Supervisor
         $process = Process::fromShellCommandline('service supervisor start');
         $process->run();
@@ -48,14 +51,14 @@ class ClearQueuedJobs extends Command
         echo $process->getOutput();
 
         // Remove jobs from queue
-        $process = Process::fromShellCommandline('redis-cli --scan --pattern queue_update:* | xargs redis-cli del');
+        $process = Process::fromShellCommandline('redis-cli -h $redis_host -p $redis_port --scan --pattern queue_update:* | xargs redis-cli -h $redis_host -p $redis_port del');
         $process->run();
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
         }
         echo $process->getOutput();
 
-        $process = Process::fromShellCommandline('redis-cli --scan --pattern queues:* | xargs redis-cli del');
+        $process = Process::fromShellCommandline('redis-cli -h $redis_host -p $redis_port --scan --pattern queues:* | xargs redis-cli  -h $redis_host -p $redis_port del');
         $process->run();
         if (!$process->isSuccessful()) {
             throw new ProcessFailedException($process);
